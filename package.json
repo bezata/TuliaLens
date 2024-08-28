@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "module": "src/server.ts",
   "type": "module",
+  "engines": {
+    "npm": ">=8.0.0 <10.8.2",
+    "node": ">=18.0.0 <20.0.0"
+  },
   "scripts": {
     "start": "bun run src/server.ts",
     "dev": "bun --watch run src/server.ts",
