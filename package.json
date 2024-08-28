@@ -1,0 +1,21 @@
+{
+  "name": "tulialens-api",
+  "version": "1.0.0",
+  "module": "src/server.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/server.ts",
+    "dev": "bun --watch run src/server.ts"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.9.3",
+    "@elysiajs/swagger": "^1.1.1",
+    "dotenv": "^16.3.1",
+    "elysia": "^0.7.15",
+    "graphql": "^16.8.0",
+    "mongodb": "^5.8.1"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  }
+}
