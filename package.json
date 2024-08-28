@@ -5,7 +5,7 @@
   "type": "module",
   "engines": {
     "npm": ">=8.0.0 <10.8.2",
-    "node": ">=18.0.0 <20.0.0"
+    "node": "18.x"
   },
   "scripts": {
     "start": "bun run src/server.ts",
@@ -20,7 +20,7 @@
     "@elysiajs/graphql-yoga": "^1.1.0",
     "@prisma/client": "^5.5.2",
     "dotenv": "^16.3.1",
-    "elysia": "^0.8.15",
+    "elysia": "^1.1.0",
     "graphql": "^16.8.1",
     "graphql-yoga": "^5.0.1"
   },
