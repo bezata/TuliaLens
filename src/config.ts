@@ -8,6 +8,6 @@ export const config = {
     process.env.DATABASE_URL ||
     "postgresql://username:password@localhost:5432/tulialens?schema=public",
   JWT_SECRET: process.env.JWT_SECRET || "your-secret-key",
-  NODE_ENV: process.env.NODE_ENV || "development",
+  NODE_ENV: process.env.NODE_ENV || "production",
   LOG_LEVEL: process.env.LOG_LEVEL || "info",
 };

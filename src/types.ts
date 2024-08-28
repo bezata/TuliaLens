@@ -1,16 +1,12 @@
 import { GraphQLResolveInfo } from "graphql";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 
 export interface Context {
   prisma: PrismaClient;
   request: Request;
 }
 
-export enum RiskLevel {
-  LOW = "LOW",
-  MEDIUM = "MEDIUM",
-  HIGH = "HIGH",
-}
+export type RiskLevel = "LOW" | "MEDIUM" | "HIGH";
 
 export interface FarmingPool {
   id: string;

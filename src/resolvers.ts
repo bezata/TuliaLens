@@ -4,12 +4,24 @@ import {
   Position,
   UserPreferencesInput,
   Context,
+  RiskLevel,
 } from "./types";
 import { GraphQLError } from "graphql";
 
+const handleError = (message: string, error: unknown): never => {
+  console.error(message, error);
+  throw new GraphQLError(message, {
+    extensions: { code: "INTERNAL_SERVER_ERROR" },
+  });
+};
+
 export const resolvers: Resolvers = {
   Query: {
-    farmingPools: async (_, { chain }, { prisma }: Context) => {
+    farmingPools: async (
+      _,
+      { chain }: { chain: string },
+      { prisma }: Context
+    ): Promise<FarmingPool[]> => {
       try {
         const pools = await prisma.farmingPool.findMany({ where: { chain } });
         if (pools.length === 0) {
@@ -19,16 +31,17 @@ export const resolvers: Resolvers = {
         }
         return pools;
       } catch (error) {
-        console.error(
+        return handleError(
           `Error fetching farming pools for chain ${chain}:`,
           error
         );
-        throw new GraphQLError("Failed to fetch farming pools", {
-          extensions: { code: "INTERNAL_SERVER_ERROR" },
-        });
       }
     },
-    bestPositions: async (_, { userPreferences }, { prisma }: Context) => {
+    bestPositions: async (
+      _,
+      { userPreferences }: { userPreferences: UserPreferencesInput },
+      { prisma }: Context
+    ): Promise<Position[]> => {
       try {
         const { riskTolerance, preferredChains, minLiquidity, minApr } =
           userPreferences;
@@ -36,23 +49,21 @@ export const resolvers: Resolvers = {
         const pools = await prisma.farmingPool.findMany({
           where: {
             chain: { in: preferredChains },
-            liquidity: { gte: minLiquidity || 0 },
-            apr: { gte: minApr || 0 },
-            riskLevel: riskTolerance,
+            liquidity: { gte: minLiquidity ?? 0 },
+            apr: { gte: minApr ?? 0 },
+            riskLevel: riskTolerance as RiskLevel,
           },
           orderBy: { apr: "desc" },
           take: 5,
         });
 
-        const positions = pools.map(
-          (pool: FarmingPool): Position => ({
-            id: pool.id,
-            poolId: pool.id,
-            recommendedAmount: pool.liquidity * 0.01,
-            estimatedReturns: pool.apr,
-            risk: pool.riskLevel,
-          })
-        );
+        const positions: Position[] = pools.map((pool) => ({
+          id: pool.id,
+          poolId: pool.id,
+          recommendedAmount: pool.liquidity * 0.01,
+          estimatedReturns: pool.apr,
+          risk: pool.riskLevel,
+        }));
 
         if (positions.length === 0) {
           throw new GraphQLError("No suitable positions found", {
@@ -61,25 +72,35 @@ export const resolvers: Resolvers = {
         }
         return positions;
       } catch (error) {
-        console.error("Error finding best positions:", error);
-        throw new GraphQLError("Failed to find best positions", {
-          extensions: { code: "INTERNAL_SERVER_ERROR" },
-        });
+        return handleError("Error finding best positions:", error);
       }
     },
   },
   FarmingPool: {
-    riskLevel: (parent: FarmingPool) => parent.riskLevel,
+    riskLevel: (parent: FarmingPool): RiskLevel => parent.riskLevel,
   },
   Position: {
-    estimatedReturns: async (parent: Position, _, { prisma }: Context) => {
-      const pool = await prisma.farmingPool.findUnique({
-        where: { id: parent.poolId },
-      });
-      if (!pool) {
-        throw new GraphQLError(`Pool not found for position: ${parent.poolId}`);
+    estimatedReturns: async (
+      parent: Position,
+      _,
+      { prisma }: Context
+    ): Promise<number> => {
+      try {
+        const pool = await prisma.farmingPool.findUnique({
+          where: { id: parent.poolId },
+        });
+        if (!pool) {
+          throw new GraphQLError(
+            `Pool not found for position: ${parent.poolId}`
+          );
+        }
+        return parent.recommendedAmount * pool.apr;
+      } catch (error) {
+        return handleError(
+          `Error calculating estimated returns for position ${parent.id}:`,
+          error
+        );
       }
-      return parent.recommendedAmount * pool.apr;
     },
   },
 };
