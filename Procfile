@@ -1,1 +1,1 @@
-web: bun run src/server.ts
+web: bun --watch run src/server.ts
