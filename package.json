@@ -5,17 +5,25 @@
   "type": "module",
   "scripts": {
     "start": "bun run src/server.ts",
-    "dev": "bun --watch run src/server.ts"
+    "dev": "bun --watch run src/server.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push",
+    "prisma:seed": "bun run prisma/seed.ts",
+    "test": "bun test"
   },
   "dependencies": {
-    "@apollo/server": "^4.9.3",
-    "@elysiajs/swagger": "^1.1.1",
+    "@elysiajs/cors": "^0.8.0",
+    "@elysiajs/graphql-yoga": "^1.1.0",
+    "@prisma/client": "^5.5.2",
     "dotenv": "^16.3.1",
-    "elysia": "^0.7.15",
-    "graphql": "^16.8.0",
-    "mongodb": "^5.8.1"
+    "elysia": "^0.8.15",
+    "graphql": "^16.8.1",
+    "graphql-yoga": "^5.0.1"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "@types/node": "^20.8.10",
+    "bun-types": "latest",
+    "prisma": "^5.5.2",
+    "typescript": "^5.2.2"
   }
 }

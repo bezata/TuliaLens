@@ -1,7 +1,9 @@
 import { GraphQLResolveInfo } from "graphql";
+import { PrismaClient } from "@prisma/client";
 
 export interface Context {
-  db: Database;
+  prisma: PrismaClient;
+  request: Request;
 }
 
 export enum RiskLevel {
@@ -21,6 +23,7 @@ export interface FarmingPool {
 }
 
 export interface Position {
+  id: string;
   poolId: string;
   recommendedAmount: number;
   estimatedReturns: number;
@@ -34,29 +37,17 @@ export interface UserPreferencesInput {
   minApr?: number;
 }
 
-export interface Database {
-  connect(): Promise<void>;
-  getFarmingPools(chain: string): Promise<FarmingPool[]>;
-  getBestPositions(userPreferences: UserPreferencesInput): Promise<Position[]>;
-  getFarmingPoolById(id: string): Promise<FarmingPool | null>;
-}
-
-export type Resolver<TResult, TParent = {}, TContext = {}, TArgs = {}> =
-  | ((
-      parent: TParent,
-      args: TArgs,
-      context: TContext,
-      info: GraphQLResolveInfo
-    ) => Promise<TResult> | TResult)
-  | {
-      fragment: string;
-      resolve: (
-        parent: TParent,
-        args: TArgs,
-        context: TContext,
-        info: GraphQLResolveInfo
-      ) => Promise<TResult> | TResult;
-    };
+export type Resolver<
+  TResult,
+  TParent = {},
+  TContext = Context,
+  TArgs = { [argName: string]: any }
+> = (
+  parent: TParent,
+  args: TArgs,
+  context: TContext,
+  info: GraphQLResolveInfo
+) => Promise<TResult> | TResult;
 
 export type Resolvers = {
   Query: {

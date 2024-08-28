@@ -1,17 +1,11 @@
 # TuliaLens API
 
-TuliaLens is a GraphQL API built with Bun, Elysia, and Apollo Server. It provides information about farming pools across various blockchain networks and helps users find the best positions based on their preferences.
-
-## Features
-
-- Fetch farming pools for specific blockchain networks
-- Get best positions based on user preferences
-- Risk level assessment for farming pools
-- Mock data for testing and development
+TuliaLens is a GraphQL API for managing farming pools and finding the best positions based on user preferences.
 
 ## Prerequisites
 
 - [Bun](https://bun.sh/) (latest version)
+- PostgreSQL database
 
 ## Setup
 
@@ -26,101 +20,71 @@ TuliaLens is a GraphQL API built with Bun, Elysia, and Apollo Server. It provide
    bun install
    ```
 
-3. Create a `.env` file in the root directory and add the following:
+3. Set up your `.env` file with your PostgreSQL database URL:
    ```
-   PORT=4000
-   DATABASE_URL=mongodb://localhost:27017/tulialens
-   ```
-
-4. Start the server:
-   ```
-   bun --watch run src/server.ts
+   DATABASE_URL="postgresql://username:password@localhost:5432/tulialens?schema=public"
    ```
 
-The server will start, and you should see output indicating the API is ready.
+4. Generate Prisma client and push the schema to your database:
+   ```
+   bun run prisma:generate
+   bun run prisma:push
+   ```
 
-## API Documentation
+5. Seed the database with initial data:
+   ```
+   bun run prisma:seed
+   ```
 
-After starting the server, you can access the Swagger UI documentation at:
+6. Start the server:
+   ```
+   bun run dev
+   ```
 
-```
-http://localhost:4000/swagger
-```
+The server will start, and you can access the GraphQL playground at `http://localhost:3000/graphql`.
 
-This provides an interactive interface to explore and test the API endpoints.
+## Available Scripts
 
-## GraphQL Endpoint
+- `bun run start`: Start the server
+- `bun run dev`: Start the server in development mode with hot reloading
+- `bun run prisma:generate`: Generate Prisma client
+- `bun run prisma:push`: Push schema changes to the database
+- `bun run prisma:seed`: Seed the database with initial data
 
-The GraphQL endpoint is available at:
+## GraphQL Queries
 
-```
-http://localhost:4000/graphql
-```
-
-You can use tools like [GraphQL Playground](https://github.com/graphql/graphql-playground) or [Postman](https://www.postman.com/) to interact with this endpoint.
-
-## Sample Queries
-
-Here are some sample GraphQL queries you can try:
-
-1. Fetch farming pools for Ethereum:
-
-```graphql
-query {
-  farmingPools(chain: "ethereum") {
-    id
-    tokenPair
-    liquidity
-    apr
-    tvl
-    riskLevel
-  }
-}
-```
+1. Fetch farming pools for a specific chain:
+   ```graphql
+   query {
+     farmingPools(chain: "ethereum") {
+       id
+       tokenPair
+       liquidity
+       apr
+       tvl
+       riskLevel
+     }
+   }
+   ```
 
 2. Get best positions based on user preferences:
-
-```graphql
-query {
-  bestPositions(userPreferences: {
-    riskTolerance: MEDIUM
-    preferredChains: ["ethereum", "bitcoin"]
-    minLiquidity: 500000
-    minApr: 0.05
-  }) {
-    poolId
-    recommendedAmount
-    estimatedReturns
-    risk
-  }
-}
-```
-
-## Project Structure
-
-- `src/server.ts`: Main entry point of the application
-- `src/resolvers.ts`: GraphQL resolvers
-- `src/db.ts`: Mock database and data access methods
-- `src/types.ts`: TypeScript type definitions
-- `src/config.ts`: Configuration management
-- `schema.graphql`: GraphQL schema definition
-
-## Development
-
-During development, you can use the `--watch` flag to automatically restart the server when files change:
-
-```
-bun --watch run src/server.ts
-```
-
-## Testing
-
-(Note: Add information about running tests once you've set up a testing framework)
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+   ```graphql
+   query {
+     bestPositions(userPreferences: {
+       riskTolerance: MEDIUM
+       preferredChains: ["ethereum", "bitcoin"]
+       minLiquidity: 500000
+       minApr: 0.05
+     }) {
+       id
+       poolId
+       recommendedAmount
+       estimatedReturns
+       risk
+     }
+   }
+   ```
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.

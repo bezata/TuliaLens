@@ -3,15 +3,15 @@ import {
   FarmingPool,
   Position,
   UserPreferencesInput,
-  RiskLevel,
+  Context,
 } from "./types";
 import { GraphQLError } from "graphql";
 
 export const resolvers: Resolvers = {
   Query: {
-    farmingPools: async (_, { chain }, { db }) => {
+    farmingPools: async (_, { chain }, { prisma }: Context) => {
       try {
-        const pools = await db.getFarmingPools(chain);
+        const pools = await prisma.farmingPool.findMany({ where: { chain } });
         if (pools.length === 0) {
           throw new GraphQLError(`No farming pools found for chain: ${chain}`, {
             extensions: { code: "NOT_FOUND" },
@@ -28,9 +28,32 @@ export const resolvers: Resolvers = {
         });
       }
     },
-    bestPositions: async (_, { userPreferences }, { db }) => {
+    bestPositions: async (_, { userPreferences }, { prisma }: Context) => {
       try {
-        const positions = await db.getBestPositions(userPreferences);
+        const { riskTolerance, preferredChains, minLiquidity, minApr } =
+          userPreferences;
+
+        const pools = await prisma.farmingPool.findMany({
+          where: {
+            chain: { in: preferredChains },
+            liquidity: { gte: minLiquidity || 0 },
+            apr: { gte: minApr || 0 },
+            riskLevel: riskTolerance,
+          },
+          orderBy: { apr: "desc" },
+          take: 5,
+        });
+
+        const positions = pools.map(
+          (pool: FarmingPool): Position => ({
+            id: pool.id,
+            poolId: pool.id,
+            recommendedAmount: pool.liquidity * 0.01,
+            estimatedReturns: pool.apr,
+            risk: pool.riskLevel,
+          })
+        );
+
         if (positions.length === 0) {
           throw new GraphQLError("No suitable positions found", {
             extensions: { code: "NOT_FOUND" },
@@ -49,10 +72,13 @@ export const resolvers: Resolvers = {
     riskLevel: (parent: FarmingPool) => parent.riskLevel,
   },
   Position: {
-    estimatedReturns: async (parent: Position, _, { db }) => {
-      const pool = await db.getFarmingPoolById(parent.poolId);
-      if (!pool)
+    estimatedReturns: async (parent: Position, _, { prisma }: Context) => {
+      const pool = await prisma.farmingPool.findUnique({
+        where: { id: parent.poolId },
+      });
+      if (!pool) {
         throw new GraphQLError(`Pool not found for position: ${parent.poolId}`);
+      }
       return parent.recommendedAmount * pool.apr;
     },
   },

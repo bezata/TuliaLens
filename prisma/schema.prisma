@@ -1,0 +1,24 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model FarmingPool {
+  id         String    @id @default(uuid())
+  tokenPair  String
+  liquidity  Float
+  apr        Float
+  chain      String
+  tvl        Float
+  riskLevel  RiskLevel
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
