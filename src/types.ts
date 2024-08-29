@@ -6,7 +6,9 @@ export interface Context {
   request: Request;
 }
 
+// @ts-ignore
 export type RiskLevel = Prisma.RiskLevel;
+// @ts-ignore
 export type Protocol = Prisma.Protocol;
 
 export interface FarmingPool {
@@ -28,15 +30,30 @@ export interface BalancerPool {
   chain: string;
 }
 
-export interface Token {
+export interface BalancerPoolDetails extends BalancerPool {
+  type: string;
+  version: number;
+  tokens: PoolToken[];
+  allTokens: AllToken[];
+  tvl: number;
+  aprItems: AprItem[];
+}
+
+export interface PoolToken {
   address: string;
   symbol: string;
   balance: number;
+  hasNestedPool: boolean;
 }
 
-export interface BalancerPoolDetails extends BalancerPool {
-  tokens: Token[];
-  tvl: number;
+export interface AllToken {
+  address: string;
+  name: string;
+}
+
+export interface AprItem {
+  title: string;
+  type: string;
   apr: number;
 }
 

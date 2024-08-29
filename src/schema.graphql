@@ -42,29 +42,36 @@ export const typeDefs = /* GraphQL */ `
     minLiquidity: Float
     minApr: Float
   }
+type BalancerPool {
+  id: ID!
+  address: String!
+  name: String!
+  chain: String!
+}
 
-  type BalancerPool {
-    id: ID!
-    address: String!
-    name: String!
-    chain: String!
-  }
 type BalancerPoolDetails {
   id: ID!
   address: String!
   name: String!
   chain: String!
   type: String!
-  tokens: [Token!]!
+  version: Int!
+  tokens: [PoolToken!]!
+  allTokens: [AllToken!]!
   tvl: Float!
-  apr: Float!
   aprItems: [AprItem!]!
 }
 
-type Token {
+type PoolToken {
   address: String!
   symbol: String!
   balance: Float!
+  hasNestedPool: Boolean!
+}
+
+type AllToken {
+  address: String!
+  name: String!
 }
 
 type AprItem {
@@ -72,5 +79,6 @@ type AprItem {
   type: String!
   apr: Float!
 }
+
 
 `

@@ -35,6 +35,7 @@ export const resolvers: Resolvers = {
             extensions: { code: "NOT_FOUND" },
           });
         }
+        // @ts-ignore
         return pools;
       } catch (error) {
         return handleError(
@@ -81,7 +82,7 @@ export const resolvers: Resolvers = {
         return handleError("Error finding best positions:", error);
       }
     },
-    balancerPools: async (): Promise<BalancerPool[]> => {
+    balancerPools: async () => {
       try {
         return await balancerService.getPools();
       } catch (error) {
@@ -90,10 +91,7 @@ export const resolvers: Resolvers = {
       }
     },
 
-    balancerPoolDetails: async (
-      _,
-      { chainId, poolId }
-    ): Promise<BalancerPoolDetails> => {
+    balancerPoolDetails: async (_, { chainId, poolId }) => {
       try {
         return await balancerService.getPoolDetails(chainId, poolId);
       } catch (error) {
