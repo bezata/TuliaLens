@@ -31,23 +31,61 @@ export class BalancerService {
     poolId: string
   ): Promise<BalancerPoolDetails> {
     try {
-      const response = await axios.get<BalancerPoolDetails>(
-        `https://api-v3.balancer.fi/pools/${chainId}/${poolId}`
+      const response = await axios.post(BALANCER_API_URL, {
+        query: `
+          query ($poolId: String!, $chain: GqlChain!) {
+            poolGetPool(id: $poolId, chain: $chain) {
+              id
+              address
+              name
+              type
+              allTokens {
+                address
+                symbol
+              }
+              poolTokens {
+                address
+                symbol
+                balance
+              }
+              dynamicData {
+                totalLiquidity
+                aprItems {
+                  title
+                  type
+                  apr
+                }
+              }
+            }
+          }
+        `,
+        variables: {
+          poolId,
+          chain: chainId.toUpperCase(),
+        },
+      });
+
+      const poolData = response.data.data.poolGetPool;
+
+      // Calculate total APR
+      const totalApr = poolData.dynamicData.aprItems.reduce(
+        (sum: number, item: { apr: number }) => sum + item.apr,
+        0
       );
 
       // Ensure the response matches our BalancerPoolDetails interface
       const poolDetails: BalancerPoolDetails = {
-        id: response.data.id,
-        address: response.data.address,
-        name: response.data.name,
-        chain: response.data.chain,
-        tokens: response.data.tokens.map((token: any) => ({
+        id: poolData.id,
+        address: poolData.address,
+        name: poolData.name,
+        chain: chainId, // We're using the provided chainId here
+        tokens: poolData.poolTokens.map((token: any) => ({
           address: token.address,
           symbol: token.symbol,
           balance: parseFloat(token.balance),
         })),
-        tvl: parseFloat(response.data.tvl),
-        apr: parseFloat(response.data.apr),
+        tvl: parseFloat(poolData.dynamicData.totalLiquidity),
+        apr: totalApr,
       };
 
       return poolDetails;

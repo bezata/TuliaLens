@@ -1,10 +1,10 @@
 export const typeDefs = /* GraphQL */ `
-  type Query {
-    farmingPools(chain: String!): [FarmingPool!]!
-    bestPositions(userPreferences: UserPreferencesInput!): [Position!]!
-    balancerPools: [BalancerPool!]!
-    balancerPoolDetails(chainId: String!, poolId: String!): BalancerPoolDetails!
-  }
+ type Query {
+  farmingPools(chain: String!): [FarmingPool!]!
+  bestPositions(userPreferences: UserPreferencesInput!): [Position!]!
+  balancerPools: [BalancerPool!]!
+  balancerPoolDetails(chainId: String!, poolId: String!): BalancerPoolDetails!
+}
 
   type FarmingPool {
     id: ID!
@@ -49,20 +49,28 @@ export const typeDefs = /* GraphQL */ `
     name: String!
     chain: String!
   }
+type BalancerPoolDetails {
+  id: ID!
+  address: String!
+  name: String!
+  chain: String!
+  type: String!
+  tokens: [Token!]!
+  tvl: Float!
+  apr: Float!
+  aprItems: [AprItem!]!
+}
 
-  type BalancerPoolDetails {
-    id: ID!
-    address: String!
-    name: String!
-    chain: String!
-    tokens: [Token!]!
-    tvl: Float!
-    apr: Float!
-  }
+type Token {
+  address: String!
+  symbol: String!
+  balance: Float!
+}
 
-  type Token {
-    address: String!
-    symbol: String!
-    balance: Float!
-  }
-`;
+type AprItem {
+  title: String!
+  type: String!
+  apr: Float!
+}
+
+`

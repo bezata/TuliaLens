@@ -85,9 +85,11 @@ export const resolvers: Resolvers = {
       try {
         return await balancerService.getPools();
       } catch (error) {
-        return handleError("Error fetching Balancer pools:", error);
+        console.error("Error in balancerPools resolver:", error);
+        throw new Error("Failed to fetch Balancer pools");
       }
     },
+
     balancerPoolDetails: async (
       _,
       { chainId, poolId }
@@ -95,10 +97,8 @@ export const resolvers: Resolvers = {
       try {
         return await balancerService.getPoolDetails(chainId, poolId);
       } catch (error) {
-        return handleError(
-          `Error fetching Balancer pool details for ${chainId}/${poolId}:`,
-          error
-        );
+        console.error("Error in balancerPoolDetails resolver:", error);
+        throw new Error("Failed to fetch Balancer pool details");
       }
     },
   },
