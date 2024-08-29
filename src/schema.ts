@@ -2,6 +2,8 @@ export const typeDefs = /* GraphQL */ `
   type Query {
     farmingPools(chain: String!): [FarmingPool!]!
     bestPositions(userPreferences: UserPreferencesInput!): [Position!]!
+    balancerPools: [BalancerPool!]!
+    balancerPoolDetails(chainId: String!, poolId: String!): BalancerPoolDetails!
   }
 
   type FarmingPool {
@@ -12,6 +14,8 @@ export const typeDefs = /* GraphQL */ `
     chain: String!
     tvl: Float!
     riskLevel: RiskLevel!
+    protocol: Protocol!
+    externalId: String
   }
 
   type Position {
@@ -28,10 +32,38 @@ export const typeDefs = /* GraphQL */ `
     HIGH
   }
 
+  enum Protocol {
+    BALANCER
+    UNKNOWN
+  }
+
   input UserPreferencesInput {
     riskTolerance: RiskLevel!
     preferredChains: [String!]!
     minLiquidity: Float
     minApr: Float
+  }
+
+  type BalancerPool {
+    id: ID!
+    address: String!
+    name: String!
+    chain: String!
+  }
+
+  type BalancerPoolDetails {
+    id: ID!
+    address: String!
+    name: String!
+    chain: String!
+    tokens: [Token!]!
+    tvl: Float!
+    apr: Float!
+  }
+
+  type Token {
+    address: String!
+    symbol: String!
+    balance: Float!
   }
 `;

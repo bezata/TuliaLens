@@ -15,10 +15,17 @@ model FarmingPool {
   chain      String
   tvl        Float
   riskLevel  RiskLevel
+  protocol   Protocol  @default(UNKNOWN)
+  externalId String?   @unique
 }
 
 enum RiskLevel {
   LOW
   MEDIUM
   HIGH
+}
+
+enum Protocol {
+  BALANCER
+  UNKNOWN
 }

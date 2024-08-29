@@ -12,15 +12,14 @@ const prisma = new PrismaClient();
 const app = new Elysia()
   .use(cors())
   .use(
-    // @ts-ignore
-    yoga<any, Context>({
+    yoga({
       typeDefs,
       resolvers,
-      context: ({ request }: { request: any }): Context => ({
+      context: ({ request }: { request: Request }): Context => ({
         prisma,
         request,
       }),
-    })
+    } as any)
   )
   .listen(config.PORT);
 

@@ -12,6 +12,7 @@ async function main() {
         chain: "ethereum",
         tvl: 5000000,
         riskLevel: "LOW",
+        protocol: "BALANCER",
       },
       {
         tokenPair: "BTC-USDC",
@@ -20,6 +21,7 @@ async function main() {
         chain: "bitcoin",
         tvl: 10000000,
         riskLevel: "MEDIUM",
+        protocol: "BALANCER",
       },
       {
         tokenPair: "BNB-BUSD",
@@ -28,6 +30,7 @@ async function main() {
         chain: "binance",
         tvl: 2500000,
         riskLevel: "HIGH",
+        protocol: "BALANCER",
       },
     ],
   });
@@ -41,3 +44,6 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
+// To run this script with Bun, use:
+// bun run seed.ts

@@ -5,8 +5,14 @@ import {
   UserPreferencesInput,
   Context,
   RiskLevel,
+  BalancerPool,
+  BalancerPoolDetails,
+  Protocol,
 } from "./types";
 import { GraphQLError } from "graphql";
+import { BalancerService } from "./integrations/balancer-api";
+
+const balancerService = new BalancerService();
 
 const handleError = (message: string, error: unknown): never => {
   console.error(message, error);
@@ -18,7 +24,7 @@ const handleError = (message: string, error: unknown): never => {
 export const resolvers: Resolvers = {
   Query: {
     farmingPools: async (
-      _,
+      _: any,
       { chain }: { chain: string },
       { prisma }: Context
     ): Promise<FarmingPool[]> => {
@@ -39,8 +45,8 @@ export const resolvers: Resolvers = {
     },
     bestPositions: async (
       _,
-      { userPreferences }: { userPreferences: UserPreferencesInput },
-      { prisma }: Context
+      { userPreferences },
+      { prisma }
     ): Promise<Position[]> => {
       try {
         const { riskTolerance, preferredChains, minLiquidity, minApr } =
@@ -51,7 +57,7 @@ export const resolvers: Resolvers = {
             chain: { in: preferredChains },
             liquidity: { gte: minLiquidity ?? 0 },
             apr: { gte: minApr ?? 0 },
-            riskLevel: riskTolerance as RiskLevel,
+            riskLevel: riskTolerance,
           },
           orderBy: { apr: "desc" },
           take: 5,
@@ -75,15 +81,36 @@ export const resolvers: Resolvers = {
         return handleError("Error finding best positions:", error);
       }
     },
+    balancerPools: async (): Promise<BalancerPool[]> => {
+      try {
+        return await balancerService.getPools();
+      } catch (error) {
+        return handleError("Error fetching Balancer pools:", error);
+      }
+    },
+    balancerPoolDetails: async (
+      _,
+      { chainId, poolId }
+    ): Promise<BalancerPoolDetails> => {
+      try {
+        return await balancerService.getPoolDetails(chainId, poolId);
+      } catch (error) {
+        return handleError(
+          `Error fetching Balancer pool details for ${chainId}/${poolId}:`,
+          error
+        );
+      }
+    },
   },
   FarmingPool: {
     riskLevel: (parent: FarmingPool): RiskLevel => parent.riskLevel,
+    protocol: (parent: FarmingPool): Protocol => parent.protocol,
   },
   Position: {
     estimatedReturns: async (
       parent: Position,
       _,
-      { prisma }: Context
+      { prisma }
     ): Promise<number> => {
       try {
         const pool = await prisma.farmingPool.findUnique({
