@@ -6,9 +6,7 @@ export interface Context {
   request: Request;
 }
 
-// @ts-ignore
 export type RiskLevel = Prisma.RiskLevel;
-// @ts-ignore
 export type Protocol = Prisma.Protocol;
 
 export interface FarmingPool {
@@ -57,6 +55,96 @@ export interface AprItem {
   apr: number;
 }
 
+export interface CurvePool {
+  id: string;
+  address: string;
+  coinsAddresses: string[];
+  decimals: string[];
+  virtualPrice: string;
+  amplificationCoefficient: string;
+  totalSupply: string;
+  name: string;
+  symbol: string;
+  implementation: string;
+  assetType: string;
+  assetTypeName: string;
+  coins: CurveCoin[];
+  poolUrls: {
+    swap: string[];
+    deposit: string[];
+    withdraw: string[];
+  };
+  lpTokenAddress: string;
+  usdTotal: number;
+  isMetaPool: boolean;
+  usdTotalExcludingBasePool: number;
+  gaugeAddress?: string;
+  gaugeRewards?: GaugeReward[];
+  gaugeCrvApy?: (number | null)[];
+  usesRateOracle: boolean;
+  isBroken: boolean;
+  hasMethods: {
+    exchange_received: boolean;
+    exchange_extended: boolean;
+  };
+  creationTs: number;
+  creationBlockNumber: number;
+  blockchainId: string;
+  registryId: string;
+  factory: boolean;
+}
+
+export interface CurveCoin {
+  address: string;
+  usdPrice: number | null;
+  decimals: string;
+  isBasePoolLpToken: boolean;
+  symbol: string;
+  poolBalance: string;
+}
+
+export interface GaugeReward {
+  gaugeAddress: string;
+  tokenPrice: number;
+  name: string;
+  symbol: string;
+  decimals: string;
+  apy: number;
+  metaData: {
+    rate: string;
+    periodFinish: number;
+  };
+  tokenAddress: string;
+}
+
+export interface CurveApiResponse {
+  success: boolean;
+  data: {
+    poolData: CurvePool[];
+  };
+}
+
+export interface LidoAPR {
+  timeUnix: number;
+  apr: number;
+  symbol: string;
+  address: string;
+  chainId: number;
+}
+
+export interface CurvePoolDetails {
+  id: string;
+  name: string;
+  address: string;
+  coins: string[];
+  coinNames: string[];
+  coinDecimals: number[];
+  underlyingCoins: string[];
+  underlyingCoinNames: string[];
+  underlyingCoinDecimals: number[];
+  totalSupply: string;
+}
+
 export interface Position {
   id: string;
   poolId: string;
@@ -95,6 +183,8 @@ export interface Resolvers {
       Context,
       { chainId: string; poolId: string }
     >;
+    curvePools: Resolver<CurvePool[], {}, Context, { blockchainId: string }>;
+    lidoStEthApr: Resolver<LidoAPR, {}, Context>;
   };
   FarmingPool: {
     riskLevel: Resolver<RiskLevel, FarmingPool>;

@@ -85,6 +85,151 @@ The server will start, and you can access the GraphQL playground at `http://loca
    }
    ```
 
+   # GraphQL API Documentation
+
+## Types
+
+### Query
+- `farmingPools(chain: String!): [FarmingPool!]!`
+- `bestPositions(userPreferences: UserPreferencesInput!): [Position!]!`
+- `balancerPools: [BalancerPool!]!`
+- `balancerPoolDetails(chainId: String!, poolId: String!): BalancerPoolDetails!`
+- `curvePools(blockchainId: String!): [CurvePool!]!`
+
+### FarmingPool
+- `id: ID!`
+- `tokenPair: String!`
+- `liquidity: Float!`
+- `apr: Float!`
+- `chain: String!`
+- `tvl: Float!`
+- `riskLevel: RiskLevel!`
+- `protocol: Protocol!`
+
+### Position
+- `id: ID!`
+- `poolId: String!`
+- `recommendedAmount: Float!`
+- `estimatedReturns: Float!`
+- `risk: RiskLevel!`
+
+### BalancerPool
+- `id: ID!`
+- `address: String!`
+- `name: String!`
+- `chain: String!`
+
+### BalancerPoolDetails
+Extends BalancerPool with:
+- `type: String!`
+- `version: Int!`
+- `tokens: [PoolToken!]!`
+- `allTokens: [AllToken!]!`
+- `tvl: Float!`
+- `aprItems: [AprItem!]!`
+
+### CurvePool
+- `id: ID!`
+- `address: String!`
+- `coinsAddresses: [String!]!`
+- `decimals: [String!]!`
+- `virtualPrice: String!`
+- `amplificationCoefficient: String!`
+- `totalSupply: String!`
+- `name: String!`
+- `symbol: String!`
+- `implementation: String!`
+- `assetType: String!`
+- `assetTypeName: String!`
+- `coins: [CurveCoin!]!`
+- `poolUrls: CurvePoolUrls!`
+- `lpTokenAddress: String!`
+- `usdTotal: Float!`
+- `isMetaPool: Boolean!`
+- `usdTotalExcludingBasePool: Float!`
+- `gaugeAddress: String`
+- `gaugeRewards: [GaugeReward!]`
+- `gaugeCrvApy: [Float]`
+- `usesRateOracle: Boolean!`
+- `isBroken: Boolean!`
+- `hasMethods: CurvePoolMethods!`
+- `creationTs: Int!`
+- `creationBlockNumber: Int!`
+- `registryId: String!`
+- `factory: Boolean!`
+
+## Enums
+
+### RiskLevel
+- `LOW`
+- `MEDIUM`
+- `HIGH`
+
+### Protocol
+- `BALANCER`
+- `UNKNOWN`
+
+## Inputs
+
+### UserPreferencesInput
+- `riskTolerance: RiskLevel!`
+- `preferredChains: [String!]!`
+- `minLiquidity: Float`
+- `minApr: Float`
+
+## Queries
+
+### farmingPools
+Retrieves farming pools for a specific blockchain.
+
+**Arguments:**
+- `chain: String!`: The blockchain to query farming pools for.
+
+**Returns:** `[FarmingPool!]!`
+
+### bestPositions
+Recommends the best positions based on user preferences.
+
+**Arguments:**
+- `userPreferences: UserPreferencesInput!`: User's investment preferences.
+
+**Returns:** `[Position!]!`
+
+### balancerPools
+Retrieves all Balancer pools.
+
+**Returns:** `[BalancerPool!]!`
+
+### balancerPoolDetails
+Retrieves detailed information about a specific Balancer pool.
+
+**Arguments:**
+- `chainId: String!`: The blockchain ID.
+- `poolId: String!`: The pool ID.
+
+**Returns:** `BalancerPoolDetails!`
+
+### curvePools
+Retrieves all Curve pools for a specific blockchain.
+
+**Arguments:**
+- `blockchainId: String!`: The blockchain ID.
+
+**Returns:** `[CurvePool!]!`
+
+## Error Handling
+
+The API uses GraphQL errors with appropriate error codes:
+
+- `NOT_FOUND`: When requested resources are not found.
+- `INTERNAL_SERVER_ERROR`: For unexpected server errors.
+
+## Notes
+
+- The `estimatedReturns` field in the `Position` type is calculated based on the `recommendedAmount` and the APR of the associated farming pool.
+- The API integrates with external services for Balancer and Curve data.
+- Error handling is implemented to provide meaningful error messages and appropriate error codes.
+
 ## License
 
 This project is licensed under the MIT License.
